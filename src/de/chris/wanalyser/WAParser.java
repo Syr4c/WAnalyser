@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +18,19 @@ import java.util.regex.Pattern;
 public class WAParser {
     private final String filePath;
     private WAChat chatFile;
+    private String firstChatPartner = null;
+    private String secondChatPartner = null;
+    private ArrayList<String> chatAsArray = new ArrayList<String>();
+
+    /* Neue Pattern */
+    /* Pattern zum parsen vom Datum aus der aktuellen Zeile */
+    private final Pattern datePattern = Pattern.compile("[\\d]{2}[.][\\d]{2}[.][\\d]{2}");
+    /* Pattern zum parsen von der aktuellen Uhrzeit (aktuell keine Verwendung */
+    private final Pattern clockPattern = Pattern.compile("[\\d]{2}[:]?[\\d]{2}");
+    /* Pattern zum parsen vom Namen aus der aktuellen Zeile in Verbindung mit der Uhrzeit um ein falsches parsen aus dem Text zu verhindern */
+    private final Pattern clockNamePattern = Pattern.compile("[\\d]{2}[:]?[\\d]{2}[\\p{Blank}][-][\\p{Blank}][\\p{Alpha}]+[:]?");
+    /* Pattern zum parsen des Namens aus aus der geparsten Uhrzeit + Name */
+    private final Pattern namePattern = Pattern.compile("[\\p{Alpha}]+");
 
     /* Alter Pattern */
     /* Pattern zum parsen vom Datum aus der aktuellen Zeile */
@@ -30,45 +42,36 @@ public class WAParser {
     /* Pattern zum parsen des Namens aus aus der geparsten Uhrzeit + Name */
     //Pattern namePattern = Pattern.compile("[\\p{Alpha}]+");
 
-    /* Neue Pattern */
-    /* Pattern zum parsen vom Datum aus der aktuellen Zeile */
-    Pattern datePattern = Pattern.compile("[\\d]{2}[.][\\d]{2}[.][\\d]{2}");
-    /* Pattern zum parsen von der aktuellen Uhrzeit (aktuell keine Verwendung */
-    Pattern clockPattern = Pattern.compile("[\\d]{2}[:]?[\\d]{2}");
-    /* Pattern zum parsen vom Namen aus der aktuellen Zeile in Verbindung mit der Uhrzeit um ein falsches parsen aus dem Text zu verhindern */
-    Pattern clockNamePattern = Pattern.compile("[\\d]{2}[:]?[\\d]{2}[\\p{Blank}][-][\\p{Blank}][\\p{Alpha}]+[:]?");
-    /* Pattern zum parsen des Namens aus aus der geparsten Uhrzeit + Name */
-    Pattern namePattern = Pattern.compile("[\\p{Alpha}]+");
-
-
     public WAParser(String filePath){
         this.filePath = filePath;
         parseFileToWAChat();
     }
 
-    public WAChat getWAChat(){
-        return chatFile;
-    }
-
+    /**
+     * Method opens the chat.txt file and starts the parse cascade.
+     */
     private void parseFileToWAChat(){
-        ArrayList<String> chatAsArray = new ArrayList<String>();
-        String firstChatPartner = null;
-        String secondChatPartner = null;
-        Boolean chatStartDateSet = false;
-        LocalDate chatStartDate = null;
 
         try(BufferedReader br = new BufferedReader(new FileReader(filePath))){
             String currentLine;
             while((currentLine = br.readLine()) != null){
-                chatAsArray.add(currentLine);
+                this.chatAsArray.add(currentLine);
             }
         } catch(IOException e) {
             System.out.println("Can't read chat file at " + filePath);
             e.printStackTrace();
         }
 
+        cleanUpChat();
+        getChatPartners();
+    }
+
+    /**
+     * Method to cleanup the 'chatAsArray' Array, remove lines which arent containing any chat information.
+     */
+    private void cleanUpChat(){
         /* Clean up chatAsArray first line - pretty ugly hard coded */
-        chatAsArray.remove(0);
+        this.chatAsArray.remove(0);
 
         /* Clean up chatAsArray to remove unparseable elements
         ArrayList<String> linesToCleanUp = new ArrayList<String>();
@@ -85,21 +88,39 @@ public class WAParser {
             chatAsArray.remove(line);
         } */
 
-        /* Get the names of the chat partners */
-        while(firstChatPartner == null || secondChatPartner == null){
-            for(String line : chatAsArray){
+        getChatPartners();
+    }
+
+    /**
+     * Method to parse out the chat partners by iterate over the array.
+     */
+    private void getChatPartners(){
+
+        while(this.firstChatPartner == null || this.secondChatPartner == null){
+            for(String line : this.chatAsArray){
                 String[] lineAttrArr = getLineAttributes(line);
                 String potentiallName = lineAttrArr[1];
 
-                if(firstChatPartner == null && potentiallName != null){
-                    firstChatPartner = potentiallName;
+                if(this.firstChatPartner == null && potentiallName != null){
+                    this.firstChatPartner = potentiallName;
                 }
 
-                if(firstChatPartner != null && !(firstChatPartner.equals(potentiallName))){
-                    secondChatPartner = potentiallName;
+                if(this.firstChatPartner != null && !(this.firstChatPartner.equals(potentiallName))){
+                    this.secondChatPartner = potentiallName;
                 }
             }
         }
+
+        countMessagesPerDay();
+    }
+
+    /**
+     * Method iterates over the array and counts the written messages per day. Stores them into a HashMap with the date as key.
+     * The Value is another HashMap storing the name as key and the messages per day as value.
+     */
+    private void countMessagesPerDay(){
+        Boolean chatStartDateSet = false;
+        LocalDate chatStartDate = null;
 
         HashMap<LocalDate, HashMap<String, Integer>> pairMapDates = new HashMap<>();
         LocalDate chatEndDate = null;
@@ -138,11 +159,21 @@ public class WAParser {
 
                 chatEndDate = tempLocaleDate;
             }
-        }
 
+            fillUpEmptyDays(chatStartDate, chatEndDate, pairMapDates);
+        }
+    }
+
+    /**
+     * @param chatStartDate
+     * @param chatEndDate
+     * @param pairMapDates
+     *
+     * Method takes the Start and End Date of a conversation to fill up the days in between with 0 : 0 text messages written.
+     */
+    private void fillUpEmptyDays(LocalDate chatStartDate, LocalDate chatEndDate, HashMap<LocalDate, HashMap<String, Integer>> pairMapDates){
         LocalDate tempLocalDate = chatStartDate;
 
-        /* fill up empty days between */
         while(!(tempLocalDate.isEqual(chatEndDate))){
             if(!(pairMapDates.containsKey(tempLocalDate))){
                 pairMapDates.put(tempLocalDate, new HashMap<String, Integer>());
@@ -152,12 +183,25 @@ public class WAParser {
             tempLocalDate = tempLocalDate.plusDays(1);
         }
 
+        createWAChat(pairMapDates);
+    }
 
-        /* Create WAChat Object */
-        chatFile = new WAChat(firstChatPartner, secondChatPartner, pairMapDates);
+    /**
+     * @param pairMapDates
+     *
+     * Method creates the final WAChat object.
+     */
+    private void createWAChat(HashMap<LocalDate, HashMap<String, Integer>> pairMapDates){
+        chatFile = new WAChat(this.firstChatPartner, this.secondChatPartner, pairMapDates);
         System.out.println("chat object successfully created.");
     }
 
+    /**
+     * @param line
+     * @return String[2] = {{DATE}, {NAME}}
+     *
+     * Helper Method to reduce the given line to its meta information such as date and name.
+     */
     private String[] getLineAttributes(String line){
         String[] returnArray = new String[2];
 
@@ -182,4 +226,10 @@ public class WAParser {
 
         return returnArray;
     }
+
+
+    public WAChat getWAChat(){
+        return chatFile;
+    }
+
 }
