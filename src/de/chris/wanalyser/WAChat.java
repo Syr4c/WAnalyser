@@ -16,6 +16,7 @@ public class WAChat {
     private final String firstChatPartner;
     private final String secondChatPartner;
     private Integer maxMessagesPerDay = 0;
+    private LocalDate dayWithMaxMessages;
     private ArrayList<WADay> days = new ArrayList<>();
 
     public WAChat(String firstChatPartner, String secondChatPartner, HashMap<LocalDate, HashMap<String, Integer>> chatHash){
@@ -37,16 +38,19 @@ public class WAChat {
 
             if(firstChatPartnerMessages > maxMessagesPerDay){
                 maxMessagesPerDay = firstChatPartnerMessages;
+                dayWithMaxMessages = currentDate;
+
             } else if(secondChatPartnerMessages > maxMessagesPerDay){
                 maxMessagesPerDay = secondChatPartnerMessages;
+                dayWithMaxMessages = currentDate;
             }
         }
 
         Collections.sort(days);
     }
 
-    public void addWADay(WADay day){
-        days.add(day);
+    public LocalDate getDayWithMaxMessages(){
+        return dayWithMaxMessages;
     }
 
     public Integer getMaxMessagesPerDay(){

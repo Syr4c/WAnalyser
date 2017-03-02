@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class WAnalyserFX extends Application {
     @Override
     public void start(Stage primaryStage) {
-        WAnalyser waAnalyser = new WAnalyser("D:\\eclipse neo workspace\\WAnalyser\\src\\de\\chris\\wanalyser\\resources\\Nico.txt");
+        WAnalyser waAnalyser = new WAnalyser("/home/chris/Dokumente/WAnalyser/Jacky.txt");
 
         primaryStage.setTitle("WAnalyser r01");
 
@@ -30,7 +30,7 @@ public class WAnalyserFX extends Application {
         }
 
         final CategoryAxis xAxis = new CategoryAxis(categories);
-        final NumberAxis yAxis = new NumberAxis(0, (waAnalyser.getWaChat().getMaxMessagesPerDay() + 2) , 1);
+        final NumberAxis yAxis = new NumberAxis(0, (waAnalyser.getWaChat().getMaxMessagesPerDay() + 15) , 1);
 
         xAxis.setLabel("Days");
         yAxis.setLabel("Messages");
@@ -47,11 +47,9 @@ public class WAnalyserFX extends Application {
         seriesFirstChatPartner.setName(waAnalyser.getWaChat().getFirstChatPartner());
         seriesSecondChatPartner.setName(waAnalyser.getWaChat().getSecondChatPartner());
 
-        System.out.println(xAxis.categorySpacingProperty());
 
-        Integer counter = 0;
         for(WAChat.WADay day : waAnalyser.getWaChat().getDays()){
-            System.out.println(counter);
+
             LocalDate currentDate = day.getDate();
             Integer messagesFirstChatPartner = day.getFirstPartnerMessages();
             Integer messagesSecondChatPartner = day.getSecondPartnerMessages();
@@ -60,8 +58,10 @@ public class WAnalyserFX extends Application {
             seriesFirstChatPartner.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), messagesFirstChatPartner));
             seriesSecondChatPartner.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), messagesSecondChatPartner));
             seriesAverageMessages.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), averageMessages));
-            counter++;
+
         }
+
+        System.out.println(waAnalyser.getWaChat().getDayWithMaxMessages().toString());
 
         Scene scene  = new Scene(lineChart,1400,800);
         //lineChart.getData().addAll(seriesFirstChatPartner, seriesSecondChatPartner, seriesAverageMessages);
