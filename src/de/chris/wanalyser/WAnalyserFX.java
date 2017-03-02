@@ -42,6 +42,7 @@ public class WAnalyserFX extends Application {
 
         XYChart.Series<String, Number> seriesFirstChatPartner = new XYChart.Series<String, Number>();
         XYChart.Series<String, Number> seriesSecondChatPartner = new XYChart.Series<String, Number>();
+        XYChart.Series<String, Number> seriesAverageMessages = new XYChart.Series<String, Number>();
 
         seriesFirstChatPartner.setName(waAnalyser.getWaChat().getFirstChatPartner());
         seriesSecondChatPartner.setName(waAnalyser.getWaChat().getSecondChatPartner());
@@ -54,13 +55,16 @@ public class WAnalyserFX extends Application {
             LocalDate currentDate = day.getDate();
             Integer messagesFirstChatPartner = day.getFirstPartnerMessages();
             Integer messagesSecondChatPartner = day.getSecondPartnerMessages();
+            Float averageMessages = day.getAverageMessages();
 
             seriesFirstChatPartner.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), messagesFirstChatPartner));
             seriesSecondChatPartner.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), messagesSecondChatPartner));
+            seriesAverageMessages.getData().add(new XYChart.Data<String, Number>(currentDate.toString(), averageMessages));
             counter++;
         }
 
         Scene scene  = new Scene(lineChart,1400,800);
+        //lineChart.getData().addAll(seriesFirstChatPartner, seriesSecondChatPartner, seriesAverageMessages);
         lineChart.getData().addAll(seriesFirstChatPartner, seriesSecondChatPartner);
 
         primaryStage.setScene(scene);

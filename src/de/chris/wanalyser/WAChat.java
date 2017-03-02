@@ -69,11 +69,13 @@ public class WAChat {
         private final LocalDate date;
         private final Integer firstChatPartnerMessages;
         private final Integer secondChatPartnerMessages;
+        private final Float averageMessages;
 
         public WADay(LocalDate date, Integer firstChatPartnerMessages, Integer secondChatPartnerMessages){
             this.date = date;
             this.firstChatPartnerMessages = firstChatPartnerMessages;
             this.secondChatPartnerMessages = secondChatPartnerMessages;
+            this.averageMessages = ((float) firstChatPartnerMessages + (float) secondChatPartnerMessages)/2;
         }
 
         @Override
@@ -91,6 +93,10 @@ public class WAChat {
 
         public Integer getSecondPartnerMessages(){
             return secondChatPartnerMessages;
+        }
+
+        public Float getAverageMessages(){
+            return averageMessages;
         }
     }
 }
