@@ -7,11 +7,13 @@ package de.chris.wanalyser;/**
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
@@ -19,10 +21,26 @@ import java.time.LocalDate;
 public class WAnalyserFX extends Application {
     @Override
     public void start(Stage primaryStage) {
+        BorderPane mainPane = (BorderPane) FXMLLoader.load(Main)
+
         WAnalyser waAnalyser = new WAnalyser("/home/chris/Dokumente/WAnalyser/Jacky.txt");
 
         primaryStage.setTitle("WAnalyser r01");
 
+        LineChart<String, Number> lineChart = drawLineChart(waAnalyser);
+
+        Scene scene  = new Scene(lineChart,1400,800);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    /**
+     *
+     * @param waAnalyser
+     * @return scene object to integrate in a stage object
+     */
+    private LineChart<String, Number> drawLineChart(WAnalyser waAnalyser){
         ObservableList<String> categories = FXCollections.observableArrayList();
 
         for(WAChat.WADay currentDate : waAnalyser.getWaChat().getDays()){
@@ -63,12 +81,10 @@ public class WAnalyserFX extends Application {
 
         System.out.println(waAnalyser.getWaChat().getDayWithMaxMessages().toString());
 
-        Scene scene  = new Scene(lineChart,1400,800);
         //lineChart.getData().addAll(seriesFirstChatPartner, seriesSecondChatPartner, seriesAverageMessages);
         lineChart.getData().addAll(seriesFirstChatPartner, seriesSecondChatPartner);
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return lineChart;
     }
 
     public static void main(String[] args){

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <right>
+      <VBox prefHeight="775.0" prefWidth="210.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="lab_cf" prefHeight="22.0" prefWidth="214.0" text="Chat File:" />
+            <Label fx:id="lab_fp" prefHeight="22.0" prefWidth="214.0" text="First Partner:" />
+            <Label fx:id="lab_sp" prefHeight="22.0" prefWidth="214.0" text="Second Partner:" />
+            <Label fx:id="conversation3" prefHeight="22.0" prefWidth="214.0" />
+            <Label fx:id="lab_ms" prefHeight="22.0" prefWidth="214.0" text="Messages send:" />
+            <Label fx:id="lab_fpms" prefHeight="22.0" prefWidth="214.0" text="First P. Messages send:" />
+            <Label fx:id="lab_spms" prefHeight="22.0" prefWidth="214.0" text="Second P. Messages send:" />
+            <Label fx:id="lab_mpd" prefHeight="22.0" prefWidth="214.0" text="Max. Messages per Day:" />
+            <Label fx:id="lab_dwmm" prefHeight="22.0" prefWidth="214.0" text="Day with Max. M:" />
+         </children>
+      </VBox>
+   </right>
+</BorderPane>
